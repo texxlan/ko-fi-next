@@ -1,22 +1,21 @@
+import { Config, mergeConfig, RequestData, Type } from '@ko-fi/types';
+
 import type { NextApiHandler, NextApiRequest } from 'next';
 
-import { CommissionData, DonationData, RequestData, ShopOrderData, SubscriptionData, Type } from '@ko-fi/types';
-
-const defaultConfig: Config = {
-    onData: () => null,
-    onCommission: () => null,
-    onDonation: () => null,
-    onShopOrder: () => null,
-    onSubscription: () => null,
-};
-
-export const kofi: (config?: Partial<Config>) => NextApiHandler = (config) => async (req, res) => {
-    const conf = { ...defaultConfig, ...config };
+export const kofi: (config?: Partial<Config<NextApiRequest>>) => NextApiHandler = (config) => async (req, res) => {
+    const conf = mergeConfig(config);
 
     const { data } = req.body as { data: string; };
 
     try {
         const parsed: RequestData = JSON.parse(data);
+
+        if (config.verificationToken && parsed.verification_token !== config.verificationToken) {
+            console.error('Ko-fi invalid verification token');
+            res.status(401);
+
+            return res.end();
+        }
 
         await conf.onData?.(parsed, req);
 
@@ -36,6 +35,7 @@ export const kofi: (config?: Partial<Config>) => NextApiHandler = (config) => as
         }
     } catch (err) {
         console.error('Ko-fi request error: ', err);
+        config.onError?.(err, req);
 
         res.status(200);
         return res.end();
@@ -44,12 +44,3 @@ export const kofi: (config?: Partial<Config>) => NextApiHandler = (config) => as
     res.status(200);
     res.end();
 }
-export interface Config {
-    onData: Callback<RequestData>;
-    onCommission: Callback<CommissionData>;
-    onDonation: Callback<DonationData>;
-    onShopOrder: Callback<ShopOrderData>;
-    onSubscription: Callback<SubscriptionData>;
-}
-
-export type Callback<TData> = (data: TData, req: NextApiRequest) => void | null | undefined | Promise<void>;
