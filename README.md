@@ -38,4 +38,8 @@ View example implementation [here](https://github.com/oneso/ko-fi-next-example);
         onSubscription: (data, req) => {
             console.log('onSubscription called');
         },
+        onError: (err, req) => {
+            console.error('onError called');
+        },
+        verificationToken: 'token',
     });
