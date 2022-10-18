@@ -1,6 +1,6 @@
 {
   "name": "@ko-fi/next",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Ko-fi webhook handler for Next.js",
   "main": "index.js",
   "scripts": {
@@ -30,6 +30,7 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "@ko-fi/handler": "^1.0.0",
     "@ko-fi/types": "^1.0.3"
   },
   "peerDependencies": {
